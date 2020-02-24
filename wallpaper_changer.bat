@@ -1,0 +1,1 @@
+pythonw C:\DevEnv\PycharmProjects\wallpaper\main.py

@@ -41,6 +41,7 @@ def check_if_file_exist(absolute_path: str) -> bool:
 def change_wallpaper_safe(absolute_path: str) -> None:
     if check_if_file_exist(absolute_path):
         change_wallpaper_unsafe(absolute_path)
+        print(f'Wallpaper changed successfully by the file located at {absolute_path}.')
     else:
         print(f'The file located at {absolute_path} does not exist. The wallpaper has not been changed.')
 
