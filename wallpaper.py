@@ -1,8 +1,13 @@
 import os
 import struct
 import ctypes
+from typing import List
+from datetime import datetime
+
+from config import WallpaperChange
 
 SPI_SETDESKWALLPAPER = 20
+LATEST_WP_CHANGE = ""  # Global variable that will be modified to hold the latest change to prevent useless changes
 
 
 def is_64_windows() -> bool:
@@ -39,8 +44,15 @@ def change_wallpaper_safe(absolute_path: str) -> None:
     else:
         print(f'The file located at {absolute_path} does not exist. The wallpaper has not been changed.')
 
-if __name__ == '__main__':
-    path = 'E:\\Edouard\Pictures\wonderbolt_dash_silhouette_wall_by_sambaneko-da81m83.png'
-    change_wallpaper_safe(path)
-    path = 'E:\\Edouard\Pictures\wla.txt'
-    change_wallpaper_safe(path)
+
+def change_wallpaper_based_on_sorted_wcs(wcs: List[WallpaperChange]) -> None:
+    global LATEST_WP_CHANGE #TODO Use API to check the current wallpaper instead of this
+    change_to_do = wcs[0]
+    now = datetime.now()
+    for wc in wcs:
+        if wc.time_at < now:
+            change_to_do = wc
+    path = change_to_do.absolute_path
+    if change_to_do is not None and path != LATEST_WP_CHANGE:
+        LATEST_WP_CHANGE = path
+        change_wallpaper_safe(path)
