@@ -12,12 +12,11 @@ def create_test_config() -> None:
     Config.serialize_config(config)
 
 if __name__ == '__main__':
-    #TODO POTENTIAL BUG AT MIDNIGHT LOL
     # Uncomment to create a test configuration
     #create_test_config()
     config = Config.deserialize_config()
-    sorted_wcs = WallpaperChange.sort_by_time_asc(config.wallpaper_changes)
     while True:
         print("TICK")
+        sorted_wcs = WallpaperChange.sort_by_time_asc(config.wallpaper_changes)
         change_wallpaper_based_on_sorted_wcs(sorted_wcs)
         time.sleep(60)
