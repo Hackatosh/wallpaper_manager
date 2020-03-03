@@ -9,7 +9,16 @@ import win32gui
 from win32com.shell import shell, shellcon
 from config import WallpaperChange
 
-LATEST_WP_CHANGE = ""  # Global variable that will be modified to hold the latest change to prevent useless changes
+""" USED TO OBTAIN THE CURRENT WALLPAPER"""
+
+SPI_GETDESKWALLPAPER = 115
+
+def get_current_wallpaper() -> str:
+    buf = ctypes.create_unicode_buffer(512) if is_64_windows() else ctypes.create_string_buffer(512)  # ctypes.c_buffer(512)
+    sys_parameters_info = get_sys_parameters_info()
+    sys_parameters_info(SPI_GETDESKWALLPAPER, len(buf), buf, 0)
+    return buf.value
+
 
 """CUSTOM WALLPAPER CHANGE WITHOUT ANY TRANSITION"""
 
@@ -120,16 +129,17 @@ def change_wallpaper_safe(absolute_path: str, use_transition: bool = True) -> No
 
 
 def change_wallpaper_based_on_sorted_wcs(wcs: List[WallpaperChange]) -> None:
-    global LATEST_WP_CHANGE  # TODO Use API to check the current wallpaper instead of this
+    current_wallpaper_path = get_current_wallpaper()
     change_to_do = wcs[-1]
     now = datetime.now()
     for wc in wcs:
         if wc.time_at < now:
             change_to_do = wc
     path = change_to_do.absolute_path
-    if change_to_do is not None and path != LATEST_WP_CHANGE:
+    if change_to_do is not None and path != current_wallpaper_path:
         LATEST_WP_CHANGE = path
         change_wallpaper_safe(path)
 
+
 if __name__ == '__main__':
-    change_wallpaper_safe(r'E:\Edouard\Pictures\Wallpapers\Wallpaper_Gravity_Falls.png')
+    print(get_current_wallpaper())
