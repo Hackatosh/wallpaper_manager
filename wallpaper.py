@@ -9,21 +9,8 @@ import win32gui
 from win32com.shell import shell, shellcon
 from config import WallpaperChange
 
-""" USED TO OBTAIN THE CURRENT WALLPAPER"""
 
-SPI_GETDESKWALLPAPER = 115
-
-def get_current_wallpaper() -> str:
-    buf = ctypes.create_unicode_buffer(512) if is_64_windows() else ctypes.create_string_buffer(512)  # ctypes.c_buffer(512)
-    sys_parameters_info = get_sys_parameters_info()
-    sys_parameters_info(SPI_GETDESKWALLPAPER, len(buf), buf, 0)
-    return buf.value
-
-
-"""CUSTOM WALLPAPER CHANGE WITHOUT ANY TRANSITION"""
-
-SPI_SETDESKWALLPAPER = 20
-
+# ~~~~~ HELPERS ~~~~
 
 def is_64_windows() -> bool:
     """Find out how many bits is OS. """
@@ -36,7 +23,49 @@ def get_sys_parameters_info():
         else ctypes.windll.user32.SystemParametersInfoA
 
 
+def get_create_buffer():
+    """Based on if this is 32bit or 64bit returns correct version of buffer creator used to
+    pass arguments to SystemParametersInfo function. """
+    return ctypes.create_unicode_buffer if is_64_windows() \
+        else ctypes.create_string_buffer
+
+
+def check_if_file_exist(absolute_path: str) -> bool:
+    """
+    Checks if the file located at the absolute path provided exists.
+    """
+    if os.path.isfile(absolute_path):
+        return True
+    else:
+        return False
+
+
+# ~~~~ WALLPAPER GETTER ~~~~
+
+SPI_GETDESKWALLPAPER = 115
+
+
+def get_current_wallpaper() -> str:
+    """
+    Returns the absolute path to the current wallpaper.
+    """
+    create_buffer = get_create_buffer()
+    buf = create_buffer(512)
+    sys_parameters_info = get_sys_parameters_info()
+    sys_parameters_info(SPI_GETDESKWALLPAPER, len(buf), buf, 0)
+    return buf.value
+
+
+# ~~~~~ LEGACY WALLPAPER CHANGE : NO TRANSITION ~~~~
+
+SPI_SETDESKWALLPAPER = 20
+
+
 def change_wallpaper_unsafe(absolute_path: str) -> None:
+    """
+    Change the current wallpaper using the file located at the absolute_path provided.
+    It is UNSAFE : if the file does not exists, no error is thrown and the wallpaper becomes black.
+    """
     sys_parameters_info = get_sys_parameters_info()
     r = sys_parameters_info(SPI_SETDESKWALLPAPER, 0, absolute_path, 3)
     # When the SPI_SETDESKWALLPAPER flag is used,
@@ -46,8 +75,10 @@ def change_wallpaper_unsafe(absolute_path: str) -> None:
         print(ctypes.WinError())
 
 
-"""WALLPAPER CHANGE WITH TRANSITION"""
-"""Snippet found on : https://stackoverflow.com/questions/56973912/how-can-i-set-windows-10-desktop-background-with-smooth-transition/56974396#56974396"""
+# ~~~~~ WALLPAPER CHANGE WITH TRANSITION ~~~~~
+
+# Snippet found on :
+# https://stackoverflow.com/questions/56973912/how-can-i-set-windows-10-desktop-background-with-smooth-transition/56974396#56974396
 
 user32 = ctypes.windll.user32
 
@@ -107,17 +138,18 @@ def change_wallpaper_unsafe_active_desktop(image_path: str, use_activedesktop: b
     force_refresh()
 
 
-""" COMMON STUFF FOR CHANGING WALLPAPER"""
-
-
-def check_if_file_exist(absolute_path: str) -> bool:
-    if os.path.isfile(absolute_path):
-        return True
-    else:
-        return False
+# ~~~~ EXPORTED ~~~~
 
 
 def change_wallpaper_safe(absolute_path: str, use_transition: bool = True) -> None:
+    """
+    Changes the wallpaper by using the file located at the absolute path provided.
+    Check if the file exists before making the change. If it doesn't exist, a warning message is printed and nothing
+    else happens.
+    Warning : It does not check to see if the file is an image.
+    If use_transition is set to False, it uses the legacy version of the wallpaper change. If it is set to True, it
+    uses the snippet with active desktop. Default value is True.
+    """
     if check_if_file_exist(absolute_path):
         if use_transition:
             change_wallpaper_unsafe_active_desktop(absolute_path)
@@ -129,6 +161,10 @@ def change_wallpaper_safe(absolute_path: str, use_transition: bool = True) -> No
 
 
 def change_wallpaper_based_on_sorted_wcs(wcs: List[WallpaperChange]) -> None:
+    """
+    Given a list of WallpaperChange, the function determines which wallpaper should be set at the current time, check
+    if it already set and if not make the change.
+    """
     current_wallpaper_path = get_current_wallpaper()
     change_to_do = wcs[-1]
     now = datetime.now()
@@ -137,9 +173,4 @@ def change_wallpaper_based_on_sorted_wcs(wcs: List[WallpaperChange]) -> None:
             change_to_do = wc
     path = change_to_do.absolute_path
     if change_to_do is not None and path != current_wallpaper_path:
-        LATEST_WP_CHANGE = path
         change_wallpaper_safe(path)
-
-
-if __name__ == '__main__':
-    print(get_current_wallpaper())

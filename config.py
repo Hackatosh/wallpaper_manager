@@ -7,6 +7,10 @@ from time_helpers import get_time_at
 
 
 class WallpaperChange:
+    """
+    This object represents a wallpaper change which will be executed every day.
+    It holds the absolute path to the wallpaper and the time at which the change has to be executed (hour and minute).
+    """
 
     def __init__(self, absolute_path: str, hour: int, minute: int):
         self.__absolute_path = absolute_path
@@ -37,10 +41,20 @@ class WallpaperChange:
 
     @classmethod
     def sort_by_time_asc(cls, wc_list: List["WallpaperChange"]) -> List["WallpaperChange"]:
+        """
+        Sort the list of wallpaper changes provided by ascending time, using the method provided in time_helpers.
+        The method returns a new list and does not sort in place.
+        """
         return sorted(wc_list, key=lambda wc: wc.time_at)
 
 
 class Config:
+    """
+    This object represents the configuration of the whole application.
+    It has static methods used for serialization / deserialization using the configparser package of Python and various
+    helpers.
+    For now, it only holds the list of wallpaper changes.
+    """
 
     def __init__(self, wallpaper_changes: List[WallpaperChange]):
         self.__wallpaper_changes = wallpaper_changes
@@ -57,14 +71,25 @@ class Config:
 
     @classmethod
     def get_default_config_path(cls) -> str:
+        """
+        Returns the default path of the configuration file.
+        The default path is ~/.wallpaper_changer/config.ini.
+        """
         return os.path.join(os.path.expanduser("~"), '.wallpaper_changer', 'config.ini')
 
     @classmethod
     def get_default_config_dir(cls) -> str:
+        """
+        Returns the default path of the configuration folder.
+        The default path is ~/.wallpaper_changer/.
+        """
         return os.path.join(os.path.expanduser("~"), '.wallpaper_changer')
 
     @classmethod
     def create_default_config_dir(cls) -> None:
+        """
+        Create the configuration folder at the default path specified by get_default_config_dir.
+        """
         path = Config.get_default_config_dir()
         if os.path.isdir(path):
             print(f"Config directory already exists !")
@@ -77,11 +102,21 @@ class Config:
             print(f"Successfully created the config directory at {path}")
 
     @classmethod
-    def get_wc_key(cls,index: int) -> str:
+    def get_wc_key(cls, index: int) -> str:
+        """
+        A simple helper for serialization/deserialization which automatically format the key used to access ONE wallpaper
+        change in the LIST of wallpaper changes.
+        """
         return f'wallpaper_change.{index}'
 
     @classmethod
     def serialize_config(cls, config: "Config", absolute_path: str = None) -> None:
+        """
+        Method used to serialize the Config object provided in a configuration file which will be stored at the absolute path
+        provided.
+        If no path is provided, it uses the default configuration path.
+        The method use the configparser Python package.
+        """
         if absolute_path is None:
             absolute_path = cls.get_default_config_path()
         config_p = configparser.ConfigParser()
@@ -96,6 +131,11 @@ class Config:
 
     @classmethod
     def deserialize_config(cls, absolute_path: str = None) -> "Config":
+        """
+        Method used to deserialize the configuration file located at the absolute_path provided into a Config object.
+        If no path is provided, it uses the default configuration path.
+        The method use the configparser Python package.
+        """
         if absolute_path is None:
             absolute_path = cls.get_default_config_path()
         config_p = configparser.ConfigParser()
