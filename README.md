@@ -16,7 +16,7 @@ These instructions will help you get Wallpaper Changer running !
 Before being able to run this project, you need to fulfill the following requirements :
 
 * A PC with Windows 10 64 Bits (it his the only OS on which the project was tested).
-* [Python 3](https://www.python.org/), with the 3.7.4 version.
+* [Python 3](https://www.python.org/), with the 3.7.4 version (the application is not packaged for the moment).
 
 ### Launch the application
 
@@ -32,15 +32,44 @@ To launch the application in the background, use :
 pythonw main.py
 ```
 
+On Windows, I recommend to use the Task Scheduler to start the script in the background at the start of the system.
+
 ### Edit the configuration file
 
+For now, only a default location for the configuration file is supported. 
+The default location is _C:\Users\username\.wallpaper_changer\config.ini_.
 
+The configuration file looks like this :
+
+```
+[wallpaper_change.0]
+absolute_path = E:\Edouard\Pictures\Wallpapers\pine_twins.png
+hour = 7
+minute = 30
+
+[wallpaper_change.1]
+absolute_path = E:\Edouard\Pictures\Wallpapers\7595.jpg
+hour = 13
+minute = 30
+
+[wallpaper_change.2]
+absolute_path = E:\Edouard\Pictures\Wallpapers\Wallpaper_Gravity_Falls.png
+hour = 20
+minute = 30
+```
+
+To add a wallpaper change, just add an other key. You can also easily edit the absolute path to the wallpaper 
+(_absolute_path_) and the time of the change (_hour_ and _minute_).
+
+As the config file is loaded only once at the start of the application, 
+the changes are effective only after the application is restarted. 
 
 ## What's coming next ?
 
 If I have the time, the following features will be added in the future :
 - A GUI to define your wallpaper changes
 - Support for other OS (only Windows 10 64 bits is officially supported for now)
+- Package the application to allows users to run it without installing Python
 - Extend the application with other trigger for wallpaper changes
 
 ## Built With
