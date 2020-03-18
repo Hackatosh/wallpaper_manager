@@ -2,7 +2,6 @@ import configparser
 import datetime
 import os
 from typing import List
-
 from time_helpers import get_time_at
 
 

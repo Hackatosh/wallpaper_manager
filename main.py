@@ -1,5 +1,4 @@
 import time
-
 from config import WallpaperChange, Config
 from wallpaper import change_wallpaper_based_on_sorted_wcs
 
@@ -14,9 +13,10 @@ def create_test_config() -> None:
     config = Config([wc1, wc2])
     Config.serialize_config(config)
 
+
 if __name__ == '__main__':
     # Uncomment to create a test configuration
-    #create_test_config()
+    # create_test_config()
     config = Config.deserialize_config()
     while True:
         print("TICK")
